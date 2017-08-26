@@ -17,7 +17,7 @@ class board(object):
 
     # Return if a move is legal or not
     def legal(self, pos:BoardPos) -> bool:
-        return self.board[pos[0]][pos[1]] == 0
+        return self.board[pos[1]][pos[0]] == 0
 
     # Return a list of touching positions
     def adjacent(self, pos:BoardPos) -> List[BoardPos]:
@@ -77,26 +77,58 @@ curses.noecho()
 curses.cbreak()
 stdscr.keypad(True)
 curses.curs_set(0)
+curses.start_color()
+
+# Setup the color pairs
+curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_RED)
+curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLUE)
 
 selectedpos = (0, 0)
 b = board()
+psturn = 1
 
 def drawface():
-    global stdscr, selectedpos, b
+    global stdscr, selectedpos, b, psturn
     stdscr.erase()
     stdscr.border()
-    stdscr.addstr(0, 10, "HEX (Press 'q' to quit)")
-    scrnpos = [2,3]
+    stdscr.addstr(0, 10, "HEX ('q'=quit,Space=move)")
+    stdscr.addstr(0, 40, "P" + str(psturn) + ' turn', curses.color_pair(psturn))
+    scrnpos = [4,5]
     count = 0
+
+    # Add the top row of -'s for 2
+    stdscr.addstr(scrnpos[0]-1, scrnpos[1]+1, '-'*(b.size[0]*2-1), curses.color_pair(2))
+
     for y, row in enumerate(b.board):
         count += 1
+
+        # Add the left row of \'s for 1
+        stdscr.addstr(scrnpos[0], scrnpos[1] + count - 1, '\\', curses.color_pair(1))
+
         for x, itm in enumerate(row):
 
-            stdscr.addstr(scrnpos[0], scrnpos[1] + count, str(itm) if itm is not 0 else '*',
-                          curses.A_REVERSE if selectedpos == (x,y) else curses.A_NORMAL)
+            if itm in [1, 2]:
+                stdscr.addstr(scrnpos[0], scrnpos[1] + count, str(itm),
+                              curses.color_pair(itm))
+                if (x,y) == selectedpos:
+                    stdscr.addstr(scrnpos[0], scrnpos[1] + count - 1, '>',
+                                  curses.color_pair(itm))
+                    stdscr.addstr(scrnpos[0], scrnpos[1] + count + 1, '<',
+                                  curses.color_pair(itm))
+            else:
+                stdscr.addstr(scrnpos[0], scrnpos[1] + count, str(itm) if itm is not 0 else '*',
+                              curses.A_REVERSE if selectedpos == (x, y) else curses.A_NORMAL)
+
             scrnpos[1] += 2
-        scrnpos[1] = 3
+
+        # Add the right row of \'s for 1
+        stdscr.addstr(scrnpos[0], scrnpos[1] + count - 1, '\\', curses.color_pair(1))
+
+        scrnpos[1] = 5
         scrnpos[0] += 1
+    # Add the bottom row of -'s for 2
+    stdscr.addstr(scrnpos[0], scrnpos[1] + (b.size[0] * 2 - 11), '-' * (b.size[0] * 2 - 1), curses.color_pair(2))
+
     stdscr.refresh()
 
 # Enter main loop
@@ -118,7 +150,11 @@ while True:
     elif c == ord('w'):
         selectedpos = ((selectedpos[0]) % 11, (selectedpos[1] - 1) % 11)
         drawface()
-
+    elif c == ord(' '):
+        if b.legal(selectedpos):
+            b.move(selectedpos, psturn)
+            psturn = 1 if psturn is 2 else 2
+            drawface()
 
 
 
