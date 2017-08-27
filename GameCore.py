@@ -14,6 +14,7 @@ class board(object):
 
         self.board = [[0] * size[0] for _ in range(size[1])]
         self.size = size
+        self.debug = 'NONE'
 
     # Return if a move is legal or not
     def legal(self, pos:BoardPos) -> bool:
@@ -22,8 +23,8 @@ class board(object):
     # Return a list of touching positions
     def adjacent(self, pos:BoardPos) -> List[BoardPos]:
         # Find if the piece is on any edge(s)
-        leftedge, rightedge = pos[0] == 0, pos[0] == self.size[0]
-        topedge, bottomedge = pos[1] == 0, pos[1] == self.size[1]
+        leftedge, rightedge = pos[0] == 0, pos[0] == self.size[0] - 1
+        topedge, bottomedge = pos[1] == 0, pos[1] == self.size[1] - 1
         # Make sure everything's sane
         assert(not (leftedge and rightedge))
         assert(not (topedge and bottomedge))
@@ -55,8 +56,46 @@ class board(object):
 
     # Find out if either player has won yet
     def boardstate(self) -> BoardState:
+        # Check for Player 1 Victory
         leftside = [self.board[i][0] for i in range(self.size[0])]
-        print(leftside)
+        currents = []
+        visited = []
+        for y, l in enumerate(leftside):
+            if l is 1:
+                currents += [(0,y)]
+        while len(currents) > 0:
+            cbuffer = []
+            for c in currents:
+                if c[0] == self.size[0] - 1:
+                    # Player 1 has won
+                    return '1 Win'
+                for adj in self.adjacent(c):
+                    if not adj in visited and self.board[adj[1]][adj[0]] == 1:
+                        cbuffer += [adj]
+                        visited += [adj]
+            currents = cbuffer
+
+        # Check for Player 2 Victory
+        topside = self.board[0]
+        currents = []
+        visited = []
+        for x, l in enumerate(topside):
+            if l is 2:
+                currents += [(x, 0)]
+        while len(currents) > 0:
+            cbuffer = []
+            for c in currents:
+                if c[1] == self.size[1] - 1:
+                    # Player 2 has won
+                    return '2 Win'
+                for adj in self.adjacent(c):
+                    if not adj in visited and self.board[adj[1]][adj[0]] == 2:
+                        cbuffer += [adj]
+                        visited += [adj]
+            currents = cbuffer
+
+        return 'No Win'
+
 
     def __str__(self):
         s = ''
@@ -93,6 +132,10 @@ def drawface():
     stdscr.border()
     stdscr.addstr(0, 10, "HEX ('q'=quit,Space=move)")
     stdscr.addstr(0, 40, "P" + str(psturn) + ' turn', curses.color_pair(psturn))
+    # Draw the winner
+    stdscr.addstr(20, 10, "Status: " + b.boardstate())
+    # Draw the debug info
+    stdscr.addstr(21, 10, "Debug :" + b.debug)
     scrnpos = [4,5]
     count = 0
 
