@@ -6,7 +6,8 @@ BoardState = {'No Win', '1 Win', '2 Win'}
 
 class board(object):
 
-    # NOTE: Left Edge is player 1,
+    # NOTE: Left Edge is player 1, and
+    # I have NOT tested with non-square boards
     def __init__(self, size:BoardPos=(11,11)):
         assert(len(size) == 2)
         assert(size[0] > 1 and size[1] > 1)
@@ -18,6 +19,15 @@ class board(object):
     # Return if a move is legal or not
     def legal(self, pos:BoardPos) -> bool:
         return self.board[pos[1]][pos[0]] == 0
+
+    def listlegals(self) -> List[BoardPos]:
+        ret = []
+        for x in range(self.size[0]):
+            for y in range(self.size[1]):
+                if self.legal((x, y)):
+                    ret += [(x, y)]
+        return ret
+
 
     # Return a list of touching positions
     def adjacent(self, pos:BoardPos) -> List[BoardPos]:
@@ -127,16 +137,16 @@ def cGame(stdscr = None, p1ai = None, p2ai = None):
     b = board()
     psturn = 1
 
-    def drawface():
-        global stdscr, selectedpos, b, psturn
+    def drawface(stdscr, selectedpos, b, psturn):
+
         stdscr.erase()
         stdscr.border()
         stdscr.addstr(0, 10, "HEX ('q'=quit,Space=move)")
         stdscr.addstr(0, 40, "P" + str(psturn) + ' turn', curses.color_pair(psturn))
         # Draw the winner
-        stdscr.addstr(20, 10, "Status: " + b.boardstate())
+        stdscr.addstr(17, 10, "Status: " + b.boardstate())
         # Draw the debug info
-        stdscr.addstr(21, 10, "Debug :" + b.debug)
+        stdscr.addstr(18, 10, "Debug :" + b.debug)
         scrnpos = [4,5]
         count = 0
 
@@ -176,18 +186,18 @@ def cGame(stdscr = None, p1ai = None, p2ai = None):
         stdscr.refresh()
 
     # Enter main loop
-    drawface()
+    drawface(stdscr, selectedpos, b, psturn)
     while True:
         # Let the AI move if it exists
         if psturn is 1 and p1ai is not None:
             b.move(p1ai(b), 1)
             psturn = 2
-            drawface()
+            drawface(stdscr, selectedpos, b, psturn)
             continue
         if psturn is 2 and p2ai is not None:
             b.move(p2ai(b), 2)
             psturn = 1
-            drawface()
+            drawface(stdscr, selectedpos, b, psturn)
             continue
 
         c = stdscr.getch()
@@ -195,21 +205,21 @@ def cGame(stdscr = None, p1ai = None, p2ai = None):
             break # Quit from game
         elif c == ord('a'):
             selectedpos = ((selectedpos[0] - 1) % 11, (selectedpos[1]) % 11)
-            drawface()
+            drawface(stdscr, selectedpos, b, psturn)
         elif c == ord('d'):
             selectedpos = ((selectedpos[0] + 1) % 11, (selectedpos[1]) % 11)
-            drawface()
+            drawface(stdscr, selectedpos, b, psturn)
         elif c == ord('s'):
             selectedpos = ((selectedpos[0]) % 11, (selectedpos[1] + 1) % 11)
-            drawface()
+            drawface(stdscr, selectedpos, b, psturn)
         elif c == ord('w'):
             selectedpos = ((selectedpos[0]) % 11, (selectedpos[1] - 1) % 11)
-            drawface()
+            drawface(stdscr, selectedpos, b, psturn)
         elif c == ord(' '):
             if b.legal(selectedpos):
                 b.move(selectedpos, psturn)
                 psturn = 1 if psturn is 2 else 2
-                drawface()
+                drawface(stdscr, selectedpos, b, psturn)
 
 
 
@@ -218,3 +228,8 @@ def cGame(stdscr = None, p1ai = None, p2ai = None):
     stdscr.keypad(False)
     curses.echo()
     curses.endwin()
+
+if __name__ == '__main__':
+    from AI import dropAI
+    ai = dropAI(2)
+    cGame(p2ai=ai)
