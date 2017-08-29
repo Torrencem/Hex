@@ -230,6 +230,6 @@ def cGame(stdscr = None, p1ai = None, p2ai = None):
     curses.endwin()
 
 if __name__ == '__main__':
-    from AI import dropAI
-    ai = dropAI(2)
+    from AI import probDropAI, dropAI
+    ai = probDropAI(2)
     cGame(p2ai=ai)
