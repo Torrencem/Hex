@@ -150,13 +150,13 @@ def cGame(stdscr = None, p1ai = None, p2ai = None):
         stdscr.addstr(17, 10, "Status: " + b.boardstate())
 
         # TEMPORARY: Add a debug message
-        from AI import hyperScoreAI
-        a = hyperScoreAI(player=1)
-        b.debug = str(a.lightDistance(b))
+        # from AI import hyperScoreAI
+        # a = hyperScoreAI(player=1)
+        # b.debug = str(a.lightDistance(b))
 
         # Draw the debug info
-        stdscr.addstr(18, 10, "Debug :" + b.debug)
-        stdscr.addstr(19, 10, "Pos :" + str(selectedpos))
+        # stdscr.addstr(18, 10, "Debug :" + b.debug)
+        # stdscr.addstr(19, 10, "Pos :" + str(selectedpos))
 
         scrnpos = [4,5]
         count = 0
@@ -241,6 +241,19 @@ def cGame(stdscr = None, p1ai = None, p2ai = None):
     curses.endwin()
 
 if __name__ == '__main__':
+    from sys import argv
     from AI import doubleProbDropAI, hyperScoreAI
-    ai = hyperScoreAI(2)
-    cGame(p2ai=ai)
+    try:
+        argv[1]
+    except:
+        print('Please provide which CPU (if any) to play against as an argument!!!')
+        exit(1)
+    t = argv[1]
+    if t == 'local':
+        cGame()
+    elif t == 'hscore':
+        ai = hyperScoreAI(2)
+        cGame(p2ai=ai)
+    elif t == 'dprop':
+        ai = doubleProbDropAI(2)
+        cGame(p2ai=ai)
