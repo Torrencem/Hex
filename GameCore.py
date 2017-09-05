@@ -15,6 +15,7 @@ class board(object):
         self.board = [[0] * size[0] for _ in range(size[1])]
         self.size = size
         self.debug = 'NONE'
+        self.listmoves = ''
 
     # Return if a move is legal or not
     def legal(self, pos:BoardPos) -> bool:
@@ -64,6 +65,7 @@ class board(object):
 
     # Make a move
     def move(self, pos:BoardPos, color:{1, 2}):
+        self.listmoves += 'ABCDEFGHIJKLMNOPQRS'[pos[0]] + str(pos[1] + 1) + '\n'
         self.board[pos[1]][pos[0]] = color
 
     # Find out if either player has won yet
@@ -147,7 +149,11 @@ def cGame(stdscr = None, p1ai = None, p2ai = None):
         stdscr.addstr(0, 10, "HEX ('q'=quit,Space=move)")
         stdscr.addstr(0, 40, "P" + str(psturn) + ' turn', curses.color_pair(psturn))
         # Draw the winner
-        stdscr.addstr(17, 10, "Status: " + b.boardstate())
+        stat = b.boardstate()
+        stdscr.addstr(17, 10, "Status: " + stat)
+        if not stat == 'No Win':
+            with open('game.txt', 'w') as f:
+                f.write(b.listmoves)
 
         # TEMPORARY: Add a debug message
         # from AI import hyperScoreAI
