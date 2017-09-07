@@ -1,7 +1,7 @@
 from random import choice
 from math import sqrt
 from copy import deepcopy
-import numpy as np
+
 
 # Compute the softmax of x (as a numpy array)
 def softmax(x):
@@ -68,6 +68,7 @@ class dropAI(object):
         return newseed
 
 class probDropAI(dropAI):
+    import numpy as np
     def __call__(self, *args, **kwargs):
         b = args[0]
         if self.randommode:
@@ -118,8 +119,8 @@ class probDropAI(dropAI):
         return newseed
 
 class doubleProbDropAI(dropAI):
-
     def __init__(self, player):
+        import numpy as np
         self.seedlings = {'Major': None, 'Minor': None}
         super().__init__(player)
 
@@ -207,6 +208,7 @@ class doubleProbDropAI(dropAI):
 
 class scoreAI(object):
     def __init__(self, player):
+        import numpy as np
         self.player = player
         self.timesmoved = 0
 
@@ -236,7 +238,7 @@ class scoreAI(object):
 class hyperScoreAI(scoreAI):
 
     def __init__(self, player):
-
+        import numpy as np
         self.easyAI = doubleProbDropAI(player) # Use another AI to start off the game
         super().__init__(player)
 
