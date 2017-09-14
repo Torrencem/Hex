@@ -257,10 +257,10 @@ if __name__ == '__main__':
     if t == 'local':
         cGame()
     elif t == 'hscore':
-        from AI import hyperScoreAI
+        from BadAI import hyperScoreAI
         ai = hyperScoreAI(2)
         cGame(p2ai=ai)
     elif t == 'dprop':
-        from AI import doublePropDropAI
+        from BadAI import doublePropDropAI
         ai = doubleProbDropAI(2)
         cGame(p2ai=ai)
